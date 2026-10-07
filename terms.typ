@@ -73,7 +73,11 @@
 #set list(indent: 1em)
 #set table(inset: 6pt, stroke: 0.5pt + gray)
 #show table: set par(justify: false)
+#let section-breaks = state("section-breaks", true)
+#let page-breaks(on) = section-breaks.update(on)
+
 #show heading.where(level: 1): it => {
+  context if section-breaks.get() { pagebreak(weak: true) }
   v(0.8em)
   text(size: 14pt, weight: "bold", it.body)
   v(0.3em)
@@ -98,8 +102,6 @@ The following Terms and Conditions of Participation (the "Terms") apply to each 
 *This organization agrees to comply with these Terms and with all applicable federal, state, and local laws and University policies. One or more of the signers has authority to sign documents on behalf of the organization.*
 
 #signatures("Booth Chair", "Booth Chair", "Booth Chair", "Head(s) of Booth")
-
-#pagebreak()
 
 = PAYMENT AUTHORIZATION
 
@@ -862,6 +864,8 @@ The following terms apply to each student organization operating a concessions s
 *This organization hereby agrees to comply with the Terms and Conditions of Participation set forth below as well as any and all applicable federal, state and local laws. One or more of the signers has authority to sign documents on behalf of the organization.*
 
 #signatures("Booth Chair", "Booth Chair", "Booth Chair", "Head(s) of Booth")
+
+#page-breaks(false)
 
 = §A.1 Operations
 
