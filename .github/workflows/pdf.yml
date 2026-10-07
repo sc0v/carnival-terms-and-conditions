@@ -1,0 +1,43 @@
+name: PDF
+
+on:
+  push:
+    branches: [main]
+    paths: [terms.typ, .github/workflows/pdf.yml]
+    tags: ["*", "!latest"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: pdf
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: typst-community/setup-typst@v5
+        with:
+          typst-version: 0.15.1
+      - run: typst compile terms.typ
+
+      - name: Update latest release
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git tag -f latest
+          git push -f origin latest
+          if gh release view latest >/dev/null 2>&1; then
+            gh release upload latest terms.pdf --clobber
+            gh release edit latest --latest --notes "Built from ${GITHUB_SHA::7}"
+          else
+            gh release create latest terms.pdf --latest --title "Latest" --notes "Built from ${GITHUB_SHA::7}"
+          fi
+
+      - name: Create versioned release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: gh release create "$GITHUB_REF_NAME" terms.pdf --latest=false --title "$GITHUB_REF_NAME"
